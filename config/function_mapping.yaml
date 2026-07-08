@@ -1,0 +1,58 @@
+client_func_map_bi: |
+  {
+    "COLGUS_3041": "Postprocess._process_bi_share",
+    "COLGUS_3042": "Postprocess._process_bi_share",
+    "COLGUS_3043": "Postprocess._process_bi_share",
+    "COLGUS_3044": "Postprocess._process_bi_share",
+    "COLGUS_3045": "Postprocess._process_bi_share",
+    "FTR_1": "Postprocess._process_bi_share",
+    "HILSP_1": "Postprocess._process_bi_share",
+    "SCOTTS_1": "Postprocess._process_bi_share"
+  }
+
+client_func_map_bi_detail: |
+  {
+    "COLGUS_3041": "_process_bi_detail_share",
+    "COLGUS_3042": "_process_bi_detail_share",
+    "COLGUS_3043": "_process_bi_detail_share",
+    "COLGUS_3044": "_process_bi_detail_share",
+    "COLGUS_3045": "_process_bi_detail_share",
+    "FTR_1": "_process_bi_detail_share",
+    "HILSP_1": "_process_bi_detail_share",
+    "SCOTTS_1": "_process_bi_detail_share"
+  }
+
+client_func_map_br: |
+  {
+    "COLGUS_3041": "Postprocess._process_br_share",
+    "COLGUS_3042": "Postprocess._process_br_share",
+    "COLGUS_3043": "Postprocess._process_br_share",
+    "COLGUS_3044": "Postprocess._process_br_share",
+    "COLGUS_3045": "Postprocess._process_br_share",
+    "FTR_1": "Postprocess._process_br_share",
+    "HILSP_1": "Postprocess._process_br_share",
+    "SCOTTS_1": "Postprocess._process_br_share"
+  }
+
+client_func_map_br_detail: |
+  {
+    "COLGUS_3041": "_process_br_detail_share",
+    "COLGUS_3042": "_process_br_detail_share",
+    "COLGUS_3043": "_process_br_detail_share",
+    "COLGUS_3044": "_process_br_detail_share",
+    "COLGUS_3045": "_process_br_detail_share",
+    "FTR_1": "_process_br_detail_share",
+    "HILSP_1": "_process_br_detail_share",
+    "SCOTTS_1": "_process_br_detail_share"
+  }
+
+client_func_map_driver: |
+  {
+    "COLGUS_3041": "src.model.readout_utils._get_driver_tag_COLGUS_tp",
+    "COLGUS_3042": "src.model.readout_utils._get_driver_tag_COLGUS_other_category",
+    "COLGUS_3043": "src.model.readout_utils._get_driver_tag_COLGUS_other_category",
+    "COLGUS_3044": "src.model.readout_utils._get_driver_tag_COLGUS_other_category",
+    "COLGUS_3045": "src.model.readout_utils._get_driver_tag_COLGUS_other_category",
+    "FTR_1": "src.model.readout_utils._get_driver_tag_FTR",
+    "HILSP_1": "src.model.readout_utils._get_driver_tag_HILSP"
+  }

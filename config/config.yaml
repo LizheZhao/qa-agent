@@ -1,0 +1,31 @@
+MODEL_VERSION: head
+LLM_SERVICE_URL: http://10.18.9.240:8076
+LLM_MODEL_NAME: deepseek-ai/DeepSeek-R1-Distill-Qwen-14B
+LLM_MAX_INPUT_TOKENS: "12000"
+EMBEDDING_SERVICE_URL: http://10.14.9.225:8077
+EMBEDDING_SERVICE_URL_CLIENT_DECK: http://10.14.9.225:8078
+CLASSIFIER_SERVICE_URL: http://10.18.9.240/ask_genome_classifier
+MONGODB_HOST: 10.18.9.240
+MONGODB_PORT: "27017"
+MONGODB_DB: ask-genome
+
+DATA_DIR: /datascience6/data/ask-genome-data
+BENCHMARK_DIR: /datascience6/data/ask-genome-benchmark
+EMBEDDING_CACHE: "1"
+EMBEDDING_CACHE_VALIDATION: "1"
+
+CLIENT_CODE: COLGUS
+MODEL_GROUP_ID: "3041"
+
+APP_ID: ask-genome-core
+OTEL_SDK_DISABLED: "1"
+
+EMBEDDING_MODEL_PATH: "intfloat/e5-large-v2"
+
+
+OPENAI_SERVICE_URL: http://10.18.7.26:5454/v1.0/client/QA/openai/responses
+GEMINI_SERVICE_URL: http://10.18.7.26:5454/v1.0/client/QA/gemini/responses
+ENTERPRISE_AI_BASE_URL : http://gpse-enterprise-ai.service.sg1.consul:5046
+OPENAI_EXTERNAL_MODEL: gpt-5.4
+GEMINI_EXTERNAL_MODEL: gemini-3-flash-preview
+CLAUDE_EXTERNAL_MODEL: claude-sonnet-4-6

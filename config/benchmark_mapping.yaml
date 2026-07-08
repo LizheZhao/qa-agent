@@ -1,0 +1,70 @@
+REJECTED_BM:
+    CLIENT_CODE: FTR
+    MODEL_GROUP_ID: "1"
+    VERSION: v20250127
+    GT_FILE: rejected_qs.csv
+    RUN: 0
+    RUN_GT_COMP: 0
+COLGUS_BM1:
+    CLIENT_CODE: COLGUS
+    MODEL_GROUP_ID: "3041"
+    VERSION: v20250217
+    GT_FILE: data_filter_tp.csv
+    RUN: 0
+    RUN_GT_COMP: 0
+COLGUS_BM2:
+    CLIENT_CODE: COLGUS
+    MODEL_GROUP_ID: "3042"
+    VERSION: v20250115
+    GT_FILE: data_filter_gt_3042.csv
+    RUN: 0
+    RUN_GT_COMP: 0
+COLGUS_BM3:
+    CLIENT_CODE: COLGUS
+    MODEL_GROUP_ID: "3043"
+    VERSION: v20250115
+    GT_FILE: data_filter_gt_3043.csv
+    RUN: 0
+    RUN_GT_COMP: 0
+COLGUS_BM4:
+    CLIENT_CODE: COLGUS
+    MODEL_GROUP_ID: "3044"
+    VERSION: v20250115
+    GT_FILE: data_filter_gt_3044.csv
+    RUN: 0
+    RUN_GT_COMP: 0
+COLGUS_BM5:
+    CLIENT_CODE: COLGUS
+    MODEL_GROUP_ID: "3045"
+    VERSION: v20250115
+    GT_FILE: data_filter_gt_3045.csv
+    RUN: 0
+    RUN_GT_COMP: 0
+FTR_BM1:
+    CLIENT_CODE: FTR
+    MODEL_GROUP_ID: "1"
+    VERSION: v20250127
+    GT_FILE: data_filter_ftr.csv
+    RUN: 0
+    RUN_GT_COMP: 0
+HILSP_BM1:
+    CLIENT_CODE: HILSP
+    MODEL_GROUP_ID: "1"
+    VERSION: v20250313
+    GT_FILE: hilsp_partial.csv
+    RUN: 0
+    RUN_GT_COMP: 0
+SCOTTS_BM1:
+    CLIENT_CODE: SCOTTS
+    MODEL_GROUP_ID: "1"
+    VERSION: v20250320
+    GT_FILE: data_filter.csv
+    RUN: 0
+    RUN_GT_COMP: 0
+LINKEDIN_BM1:
+    CLIENT_CODE: LINKEDIN
+    MODEL_GROUP_ID: "11"
+    VERSION: v20260424
+    GT_FILE: linkedin_test_0424.csv
+    RUN: 1
+    RUN_GT_COMP: 0
