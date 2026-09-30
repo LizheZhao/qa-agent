@@ -1,0 +1,72 @@
+.composer {
+  margin: 0 14px 14px;
+  overflow: hidden;
+  border: 1px solid #d5d5d2;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.composer textarea {
+  width: 100%;
+  min-height: 58px;
+  resize: none;
+  padding: 12px 13px 5px;
+  border: 0;
+  outline: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.composer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 7px 7px 12px;
+  color: #94948f;
+  font-size: 10px;
+}
+
+.composer-footer button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 9px;
+  background: #171717;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.working-spinner {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: working-spinner 700ms linear infinite;
+}
+
+@keyframes working-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .working-spinner {
+    animation: none;
+  }
+}
+
+.turn--optimistic {
+  opacity: 0.82;
+}
+
+.message--pending {
+  color: #858580;
+  font-size: 12px;
+}

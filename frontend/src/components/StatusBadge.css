@@ -1,0 +1,10 @@
+.status {
+  color: #555551;
+  font-size: 10px;
+  font-weight: 650;
+  text-transform: capitalize;
+}
+
+.status--error {
+  color: #c82f27;
+}

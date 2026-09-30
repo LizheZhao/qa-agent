@@ -1,0 +1,20 @@
+.load-more {
+  width: 100%;
+  margin-top: 6px;
+  padding: 9px 10px;
+  border: 1px solid #dededb;
+  border-radius: 8px;
+  background: #fff;
+  color: #6c6c68;
+  font-size: 12px;
+}
+
+.load-more:hover {
+  background: #f7f7f5;
+}
+
+.load-more.inline {
+  width: auto;
+  margin: 8px auto;
+  display: block;
+}

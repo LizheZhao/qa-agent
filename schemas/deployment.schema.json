@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentic-orchestration.invalid/schemas/deployment.schema.json",
+  "title": "Agentic orchestration deployment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["deployment", "application", "platform", "integrations", "agents", "entry_agent"],
+  "properties": {
+    "deployment": {"$ref": "#/$defs/deploymentIdentity"},
+    "application": {"$ref": "#/$defs/packageVersion"},
+    "platform": {"$ref": "#/$defs/packageVersion"},
+    "integrations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enterprise_llm"],
+      "properties": {"enterprise_llm": {"$ref": "#/$defs/packageVersion"}}
+    },
+    "agents": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-z][a-z0-9_-]*$"},
+      "additionalProperties": {"$ref": "#/$defs/agent"}
+    },
+    "entry_agent": {"type": ["string", "null"]}
+  },
+  "$defs": {
+    "deploymentIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "revision"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?$"}
+      }
+    },
+    "packageVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package", "version"],
+      "properties": {
+        "package": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package", "version", "entrypoint", "manifest_entrypoint", "routable"],
+      "properties": {
+        "package": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "entrypoint": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*$"},
+        "manifest_entrypoint": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*$"},
+        "routable": {"type": "boolean"}
+      }
+    }
+  }
+}

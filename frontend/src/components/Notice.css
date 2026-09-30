@@ -1,0 +1,16 @@
+.error-banner,
+.warning-banner {
+  margin: 10px 14px 0;
+  padding: 9px 11px;
+  border: 1px solid #efc5c2;
+  border-radius: 8px;
+  background: #fff8f7;
+  color: #7d211b;
+  font-size: 12px;
+}
+
+.warning-banner {
+  border-color: #d7d7d2;
+  background: #f7f7f4;
+  color: #595955;
+}

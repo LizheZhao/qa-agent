@@ -2,7 +2,13 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/qa-agent.iml" filepath="$PROJECT_DIR$/.idea/qa-agent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/agentic-orchestration.iml" filepath="$PROJECT_DIR$/.idea/agentic-orchestration.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ask-genome-agent.iml" filepath="$PROJECT_DIR$/.idea/ask-genome-agent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/enterprise-llm.iml" filepath="$PROJECT_DIR$/.idea/enterprise-llm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/marketing-science-agent.iml" filepath="$PROJECT_DIR$/.idea/marketing-science-agent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/orchestration-core.iml" filepath="$PROJECT_DIR$/.idea/orchestration-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/orchestration-tools.iml" filepath="$PROJECT_DIR$/.idea/orchestration-tools.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/router-agent.iml" filepath="$PROJECT_DIR$/.idea/router-agent.iml" />
     </modules>
   </component>
 </project>

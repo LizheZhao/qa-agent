@@ -2,63 +2,139 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## What this repo is
 
-"Ask Genome" is a QA agent that answers natural-language questions about marketing mix model results (ROI, spend, media tactics) for Analytic Partners clients. A query flows through NER filter extraction, data filtering and a "readout" (context string built from client data tables), then an LLM generates the final answer.
+A single-process ("shared worker") agentic orchestration service. FastAPI serves chat, history and
+diagnostic APIs; LangGraph agents run in-process; MongoDB holds durable conversation turns and
+execution traces; a React/Vite diagnostic UI is served from the same Uvicorn process at
+`/diagnostics`.
+
+The deployment unit is one immutable image containing the app plus every explicitly declared agent
+package. Agents are never discovered by filesystem scan: `deployments/local.yaml` (validated against
+`schemas/deployment.schema.json`) declares exact package, version, graph entrypoint, manifest
+entrypoint and routing eligibility, and startup compiles those graphs once.
+
+## Engineering rules live in AGENTS.md
+
+`AGENTS.md` (root) is the binding engineering contract, with subtree additions in `src/AGENTS.md` and
+`frontend/AGENTS.md`. **Read the applicable AGENTS.md before editing.** It owns the dependency-direction
+rules, persistence invariants, test-marker policy, generated-file rules and per-scope verification
+gates. Do not restate or contradict it here.
 
 ## Commands
 
-- Run FastAPI service: `uvicorn services:app` (endpoints under root path `/ask_genome_core`)
-- Run Streamlit chat UI: `streamlit run st-main.py`
-- Run a single query end to end: `python main.py` (requires `CLIENT_CODE` and `MODEL_GROUP_ID` env vars; edit the hardcoded `query` in the file)
-- Run benchmarks: `python test.py` (driven by `config/benchmark_mapping.yaml`; see below)
-- Lint: `flake8 .` (first `pip install .` to register the custom flake8 plugin)
+Setup (Python 3.12 + `uv` workspace, one lockfile, no per-package venvs):
 
-There is no pytest suite; `tests/test_ner.py` is a placeholder. `test.py` and `test_ner.py` at the root are benchmark scripts, not unit tests.
+```bash
+uv sync --frozen --all-packages --dev
+```
 
-Note: `main.py`, `test.py` and `test_ner.py` call `logging.config.fileConfig('logging.conf')` at import, and `docs/coding_style.md` references a `requirements.txt` and `.flake8` file. None of these files are in the repo — they must exist locally (cwd) for those entry points and for lint config to work.
+Run the service (needs `.env` copied from `.env.example` with real MongoDB values):
 
-## Configuration and Environment Variables
+```bash
+uv run uvicorn agentic_orchestration.main:app --host 127.0.0.1 --port 8000
+```
 
-Everything is configured via environment variables, populated by import-time side effects:
+Full Python gate set, same as CI (`.github/workflows/ci.yaml`):
 
-- `import src` runs `set_environment_variables()` which loads `config/config.yaml` into `os.environ` (only keys not already set — real env vars win)
-- `import src.benchmark` similarly loads `config/benchmark.yaml` (e.g. `RUN_NAME`)
-- `src/model/readout.py` loads `config/function_mapping.yaml` the same way
+```bash
+uv run ruff format --check . && uv run ruff check --no-cache . && uv run mypy && uv run pytest && uv run python scripts/validate_deployment.py
+```
 
-`CLIENT_CODE` and `MODEL_GROUP_ID` select the active client and are mutated globally per request in `services.py` — most data loaders read them from `os.environ` rather than taking parameters, so this is process-wide state.
+Single test file or test:
 
-Other key configs:
-- `config/prompt.yaml`: Jinja2 readout prompt, rejection messages and per-client prompt overrides keyed by `{CLIENT_CODE}-{MODEL_GROUP_ID}` (loaded by `PromptTemplates` in `src/model/common.py`)
-- `config/metric_mapping.yaml`, `config/function_mapping.yaml`: metric and function dispatch mappings
+```bash
+uv run pytest tests/unit/test_router_graph.py -k test_name
+```
 
-## Architecture
+Markers: `unit`, `integration` run by default. `live` (enterprise gateway credentials) and `mongo`
+(retains records in configured MongoDB) are opt-in and skip without their env flags. Normal collection
+must never hit the network.
 
-Core pipeline (same flow in `main.py`, `services.py` and `st-main.py`):
+Frontend (Node 24.15+ on the 24 LTS line, or 26+):
 
-1. `ProcessIndicator.from_local()` (`src/data/data_interface.py`) loads per-client feature flags (legacy preprocessing, spaCy, hallucination alerts)
-2. `generate_ner_filter()` (`src/model/filter_generator.py`) extracts structured filters (intention, metrics, dimensions, trend/rank) from the query using LLM structured responses, spaCy, a remote classifier and embedding-similarity in-context example selection; returns a `ReadoutData`
-3. `process_data()` (`src/model/readout.py`, the largest module) filters client dataframes, builds pivot/benchmark/planner tables and assembles the readout context string
-4. `response_generate()` / `stream_response()` sends the readout prompt to the LLM
+```bash
+cd frontend && npm ci && npm test && npm run build
+```
 
-Layers:
-- `src/data/`: dataclasses in `data_interface.py` with `from_local()` constructors (all `from_database()` variants are stubs). `local.py` maps logical keys to files under `{DATA_DIR}/{CLIENT_CODE}/{MODEL_GROUP_ID}/` — all client data comes from that filesystem tree (a network share in practice)
-- `src/model/`: NER filtering and readout logic. Client-specific variants live in `*_other_category.py` files alongside the legacy versions (`data_filtering.py` vs `data_filtering_other_category.py`, same for readout)
-- `src/integrations/`: thin clients for external self-hosted services — OpenAI-compatible LLM at `LLM_SERVICE_URL` (DeepSeek R1 distill), embedding service, classifier service, and OpenTelemetry setup (`OTEL_SDK_DISABLED: "1"` by default)
-- `src/benchmark/`: benchmark pipeline plus per-client `DataFilter` validation classes (e.g. `DataFilterColgusTp`) built via `data_filter_factory()`
-- `src/pipelines/`: empty stubs
+`npm run check:api` regenerates `src/api/schema.d.ts` from FastAPI's OpenAPI and fails on drift. Run it
+whenever routes or response models change. Never hand-edit `schema.d.ts` or `frontend/dist/`.
 
-The LLM emits `<think>...</think>` reasoning. Streaming consumers (`services.py` `event_stream`, `st-main.py`) split chunks on `</think>` and route them to separate think/main SSE events or UI panels — preserve this contract when touching streaming code.
+Image and compose changes also require:
 
-`services.py` passes dataframes between the `/get_data_filter` and `/stream_response` endpoints as base64-encoded feather blobs (`df_to_b64`/`b64_to_df`).
+```bash
+docker compose config --quiet && docker build --build-arg SOURCE_COMMIT="$(git rev-parse HEAD)" -t agentic-orchestration:local .
+```
 
-## Benchmarks
+## Architecture: request path
 
-See `docs/benchmark.md`. Each entry in `config/benchmark_mapping.yaml` has `RUN`/`RUN_GT_COMP` toggles (0/1). Results are cached as `{RUN_NAME}_data_filter.pkl` under `{BENCHMARK_DIR}/{CLIENT_CODE}/{MODEL_GROUP_ID}/{VERSION}` — delete the pkl to force a rerun with the same `RUN_NAME`.
+`FastAPI route (api/) -> Executor (execution/executor.py) -> AgentRegistry -> startup-compiled router
+graph -> RegistryAgentInvoker -> one eligible child graph`.
 
-## Coding Style
+Startup assembly is one phase in `src/agentic_orchestration/lifespan.py`, and reading it is the fastest
+way to understand runtime wiring. Order matters: child graphs compile first with only the tools their
+manifests declare, then the restricted invoker and routing catalog are built from those children, then
+the router compiles with the invoker plus catalog injected, then the merged registry freezes.
 
-From `docs/coding_style.md`:
-- flake8 enforces codes `N,E,F,C,B` (PEP 8)
-- `print()` is prohibited in `src/model/*` — enforced by the custom flake8 rule `G001` in `plugins/flake8_custom_rules.py` (installed via `pip install .`); use the module-level `logger` instead
-- Files matching `test-*.py` are excluded from style checks (local development)
+The router is the durable session owner and delegates to at most one child per turn. `routable: false`
+in the manifest makes an agent unreachable by delegation.
+
+## Architecture: the three storage concerns
+
+Keep these separate; conflating them breaks the contracts.
+
+1. **Conversation sessions** (`sessions/`). `sessions` metadata documents plus immutable `session_turns`.
+   Per-session process-local lock serializes load, graph invoke, commit. Graph execution happens
+   *outside* the transaction; a short transaction then inserts the turn and advances the session only if
+   the revision still matches. A conflict returns retryable `409` without reinvoking the model or tools.
+   Failed invocations create no turn, so a failed first turn leaves no empty session. This is not
+   LangGraph checkpointing and there is no resume. Durable document shapes, collection names and index
+   names live in `sessions/schema.py`; router-era turns are schema version 2.
+2. **Execution traces** (`observability/`). One root trace per attempted turn, propagated through router
+   and child graphs, spanning graph/node/model/tool/child-agent boundaries with bounded
+   secret-redacting content capture. Persisted best effort by a bounded writer: observability failure
+   must never fail an otherwise committed conversation. Production uses a null event publisher until
+   authenticated SSE exists.
+3. **Diagnostic reads** (`diagnostics/`). A separate `DiagnosticReadStore` protocol for cursor-paged
+   cross-collection dashboard queries. Do not add dashboard reads to `SessionStore` or conversation
+   writes to `DiagnosticReadStore`.
+
+Each has a Mongo adapter plus a memory adapter. Memory adapters are injected test substitutes, not a
+runtime fallback: production fails startup rather than degrading session storage.
+
+## Packaging layout
+
+Every installable project is `<root>/pyproject.toml` + `src/<unique_import_package>/`. Distribution
+names use hyphens, import packages use underscores. Agents cannot share one `src/` because each would
+export colliding top-level `graph`, `state`, `manifest`, `prompts` modules into the shared interpreter.
+
+- `src/agentic_orchestration/` app; `src/integrations/` external connection construction only (takes
+  explicit values, never imports `Settings`)
+- `packages/orchestration-core/` framework-facing contracts (`AgentManifest`, `AgentDependencies`,
+  `AgentDescriptor`, invocation, observability, tools)
+- `packages/enterprise-llm/` LangChain `BaseChatModel` gateway with Claude/OpenAI request shapes
+- `packages/agents/<name>/` one distribution per agent, each with `manifest.py`, `graph.py`
+  (`create_graph(deps) -> StateGraph`, returned uncompiled), `state.py`, `prompts.py`, optional
+  `contracts.py` and `nodes/`
+- `packages/tools/src/orchestration_tools/<family>/` all tools in one app-coupled distribution
+- `packages/agents/_template`, `packages/tools/_template` non-runnable scaffolds; never installed
+
+Version synchronization is a real gate: an architectural package change must keep its
+`pyproject.toml` version, exported manifest version, `deployments/local.yaml` declaration and
+`uv.lock` in agreement, or `scripts/validate_deployment.py` fails.
+
+## Frontend structure
+
+`src/app/` composition only (providers, navigation, error boundary, shell). `src/features/<domain>/`
+owns its components, requests, feature types, tests and CSS. `src/components/` only for things two or
+more features use. Renderer-neutral trace transformation stays in `features/traces/projection.ts` and
+layout in `canvas-model.ts`, importing no React and no browser globals. Tabs are Lab, Agents,
+Conversations, Runs under the `/diagnostics/` Vite base.
+
+## Reference docs
+
+`ARCHITECTURE.md` for boundaries and durability semantics. `docs/repository-layout.md`,
+`docs/routing-agent.md`, `docs/execution-observability.md`, `docs/diagnostic-ui.md`,
+`docs/enterprise-llm.md`, and the `docs/adding-a{n-agent,-subagent,-subgraph,-tool}.md` how-tos.
+`README.md` lists what is deliberately *not* implemented (summaries, auth/tenancy, streaming,
+checkpoint-resume, distributed queues, remote agents).

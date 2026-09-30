@@ -1,0 +1,75 @@
+.attempt-list {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.runs-browser {
+  min-height: 0;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.browser-explainer {
+  margin: 9px 7px 5px;
+  color: #82827d;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.attempt-row {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 11px;
+  text-align: left;
+}
+
+.attempt-row:hover,
+.attempt-row.is-selected {
+  background: #f5f5f3;
+}
+
+.attempt-row.is-selected::before {
+  position: absolute;
+  inset: 7px auto 7px 0;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(#59d9ff, #f94037);
+  content: "";
+}
+
+.attempt-row time {
+  color: #92928d;
+}
+
+.attempt-copy {
+  min-width: 0;
+}
+
+.attempt-copy strong,
+.attempt-copy small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attempt-copy strong {
+  font-size: 11px;
+  font-weight: 580;
+}
+
+.attempt-copy small {
+  margin-top: 2px;
+  color: #92928d;
+  font: 8px "SFMono-Regular", Consolas, monospace;
+}

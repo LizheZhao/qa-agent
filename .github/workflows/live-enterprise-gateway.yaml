@@ -1,0 +1,40 @@
+name: Live enterprise gateway
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gateway:
+    runs-on: ubuntu-latest
+    environment: enterprise-gateway-stage
+    env:
+      LLM_SERVICE_URL: ${{ secrets.LLM_SERVICE_URL }}
+      EXTERNAL_VENDOR: ${{ vars.EXTERNAL_VENDOR || 'claude' }}
+      EXTERNAL_MODEL: ${{ secrets.EXTERNAL_MODEL }}
+      CLIENT_CODE: ${{ secrets.CLIENT_CODE }}
+      GATEWAY_TOKEN: ${{ secrets.GATEWAY_TOKEN }}
+      GATEWAY_USER: ${{ secrets.GATEWAY_USER }}
+      GATEWAY_TIMEOUT_SECONDS: ${{ vars.GATEWAY_TIMEOUT_SECONDS || '180' }}
+      RUN_LIVE_GATEWAY_TESTS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - name: Verify secret configuration
+        shell: bash
+        run: |
+          for name in LLM_SERVICE_URL EXTERNAL_MODEL CLIENT_CODE GATEWAY_TOKEN GATEWAY_USER; do
+            if [ -z "${!name:-}" ]; then
+              echo "Required enterprise-gateway secret is missing: ${name}"
+              exit 2
+            fi
+          done
+      - name: Install locked workspace
+        run: uv sync --frozen --all-packages --dev
+      - name: Run live gateway test
+        run: uv run pytest -m live

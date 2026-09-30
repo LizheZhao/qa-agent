@@ -1,0 +1,20 @@
+.empty-state {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #8a8a85;
+  font-size: 13px;
+  text-align: center;
+}
+
+.empty-state strong {
+  color: #3b3b38;
+  font-weight: 600;
+}
+
+.empty-state.compact {
+  min-height: 80px;
+}

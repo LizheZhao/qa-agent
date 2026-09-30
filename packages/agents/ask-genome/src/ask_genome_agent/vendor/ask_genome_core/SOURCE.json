@@ -1,0 +1,62 @@
+{
+  "source": "ask-genome-core",
+  "commit": "bb1e1637bca45106a3f2efa4cceaca2d30b389f2",
+  "files": {
+    "src/model/readout.py": "67e60a3d74443bf6e67dce923ec9e43fa13ad14d8d5e590a64428f33bfa49107",
+    "src/model/readout_utils.py": "21023515739f42b19c57926d16915da061f8b83f05a4b4521b96aa699286d1c0",
+    "src/model/common.py": "700970f0c81028927684b8e69ec737b2b07ffda329b154c4f5ac7af19a50e146",
+    "src/data/data_interface.py": "103ee584c81e6a18ae333dd36497785f23cfa893100a86a3a5384b162724aabd",
+    "src/data/local.py": "53d0f82baaea98568260b5ef3795b8fee6d394b45c53d541c3a4e2a86529f172",
+    "src/utils.py": "b77ca5e0fb47b7e0ee2d306d653696ec41f55e136b8424d81fc2e22a11be01f6",
+    "src/insight_generation/utils.py": "7a1c22ed86e2b38d0455edd10ca3c00953eaa63fb965e265e678827c115dc37e",
+    "src/insight_generation/roi.py": "1cdc5f07522ba2d19a10a9a9a9bddfe272dceebb9e7961556e7bb610cdd370a4",
+    "src/insight_generation/spend.py": "1056881481c56bc2688bcdd9ac056251835a5fd926c294d0756730872afe71bc",
+    "src/insight_generation/contribution.py": "08cfc8fd21cdc7396d5d1ba51656b49731126bd60e62559cad6e5e5123a35942",
+    "src/insight_generation/standard_metric.py": "efdffc5af94691acf4e649a822375b496426bfe42c846b723e9d73afb55453d1",
+    "src/model/coverage.py": "735faa0c07205bd51bee601a2a5c598436adbdef2976ebc8c3e655d03cbd9e27",
+    "config/function_mapping.yaml": "a5ff05799241eca539952263c43f6a67d2de4f48c0d4f2ddbc801e2d9c71ba24",
+    "config/prompt.yaml": "ba74de9b93fe62545e223dbc57f7e6cfbd8aa0dc13ef5168df6ea1b7695a2521",
+    "chart/common.py:get_chart_set_inst": "ee3dbaf0dca466059e9240161e5794cd34f0cf83274fbf6986c4e49e0ba5d5bb",
+    "src/model/visual_config_utils.py:_generate_insights_prompt": "6726d8831f4663b1f6711db5180d7fe6e7f4501b995167c7372910dc7a763652"
+  },
+  "stubs": [
+    "integrations/llm.py",
+    "integrations/llm_external.py",
+    "integrations/sdk_utils.py"
+  ],
+  "extracts": {
+    "model/visual_config_utils.py": [
+      "chart/common.py:get_chart_set_inst",
+      "src/model/visual_config_utils.py:_generate_insights_prompt"
+    ]
+  },
+  "client_env_renames": {
+    "model/readout_utils.py": 2,
+    "model/common.py": 3,
+    "data/local.py": 7,
+    "utils.py": 3
+  },
+  "edits": [
+    {
+      "file": "model/common.py",
+      "why": "Read relative to the working directory; resolve it beside the vendored copy.",
+      "old": "load_yaml_file(\"./config/prompt.yaml\")",
+      "new": "load_yaml_file(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), \"config\", \"prompt.yaml\"))",
+      "count": 1
+    },
+    {
+      "file": "model/readout_utils.py",
+      "why": "Imported but used only in commented-out code; not a dependency of the orchestrator.",
+      "old": "from sklearn.linear_model import LinearRegression\nfrom sklearn.metrics import r2_score\n",
+      "new": "# from sklearn.linear_model import LinearRegression  (vendored: used only in dead code)\n# from sklearn.metrics import r2_score  (vendored: used only in dead code)\n",
+      "count": 1
+    },
+    {
+      "file": "model/readout.py",
+      "why": "Read at import relative to the working directory; resolve it beside the vendored copy.",
+      "old": "def set_environment_variables(path='config/function_mapping.yaml') -> None:",
+      "new": "def set_environment_variables(\n        path=str(pathlib.Path(__file__).resolve().parents[1]\n                 / 'config' / 'function_mapping.yaml'),\n) -> None:",
+      "count": 1
+    }
+  ]
+}

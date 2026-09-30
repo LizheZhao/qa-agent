@@ -1,0 +1,37 @@
+# Keep this aligned with the COPY and --mount instructions in the Dockerfile.
+# Only pyproject.toml, uv.lock, requirements-runtime.txt, src, packages,
+# deployments, schemas, and scripts are consumed by any stage. Everything large
+# or irrelevant is excluded here so a new directory cannot silently enter the
+# build context.
+
+# Source control and local agent state
+.git
+.github
+.agents
+.codex
+
+# Frontend: no stage consumes it; node_modules alone is ~143 MB
+frontend
+
+# Local environments and caches
+.venv
+.mypy_cache
+.pytest_cache
+.ruff_cache
+__pycache__
+*.pyc
+*.pyo
+
+# Not part of any image
+tests
+docs
+*.md
+compose.yaml
+Dockerfile
+.dockerignore
+
+# Never permitted in a build context
+.env
+.env.*
+*.pem
+*.key

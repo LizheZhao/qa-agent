@@ -1,0 +1,105 @@
+.clarification {
+  margin: 0 14px 14px;
+  padding: 14px;
+  border: 1px solid #d5d5d2;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.clarification fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.clarification legend {
+  padding: 0;
+  font-size: 14px;
+  font-weight: 620;
+  line-height: 1.4;
+}
+
+.clarification-options {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.clarification-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #e2e2de;
+  border-radius: 9px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.clarification-option:has(input:checked) {
+  border-color: #b9b9b3;
+  background: #f5f5f3;
+}
+
+.clarification-option input {
+  margin: 2px 0 0;
+}
+
+.clarification-option small {
+  display: block;
+  margin-top: 2px;
+  color: #858580;
+  font-size: 10px;
+}
+
+.clarification-free-text {
+  display: grid;
+  gap: 5px;
+  margin-top: 12px;
+  color: #74746f;
+  font-size: 11px;
+}
+
+.clarification-free-text textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 9px 10px;
+  border: 1px solid #deded9;
+  border-radius: 9px;
+  outline: 0;
+  font-size: 13px;
+}
+
+.clarification-free-text textarea:focus-visible {
+  border-color: #8b8b85;
+}
+
+.clarification-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.clarification-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.clarification-cancel {
+  border: 1px solid #d5d5d2;
+  background: #fff;
+}
+
+.clarification-submit {
+  border: 0;
+  background: #171717;
+  color: #fff;
+}

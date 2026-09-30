@@ -1,0 +1,19 @@
+# No build: stanza. This file runs an already-built, explicitly authorized release
+# image; `docker compose up` must never produce one. Set IMAGE_TAG to the release
+# tag, or IMAGE_REPOSITORY to a digest-pinned reference, before starting the worker.
+services:
+  worker:
+    image: ${IMAGE_REPOSITORY:-agentic-orchestration}:${IMAGE_TAG:-local}
+    # never, not missing: `missing` would let Compose pull an unexpected public
+    # image if the named tag is absent locally. Only an explicitly authorized,
+    # locally present release image may run.
+    pull_policy: never
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DEPLOYMENT_PATH: /app/deployments/local.yaml
+      DEPLOYMENT_SCHEMA_PATH: /app/schemas/deployment.schema.json
+      SOURCE_COMMIT: ${SOURCE_COMMIT:-unknown}
+    ports:
+      - "${PORT:-8000}:8000"

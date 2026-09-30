@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ask-genome-agent"
+version = "0.7.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "orchestration-core",
+  "spacy",
+  "nltk",
+  "numpy",
+  # Matches what ask-genome-core deploys (Python 3.10, pandas 2.3). Its code is not yet pandas 3
+  # compatible: grouping columns leave groupby.apply and chained inplace fills stop applying.
+  # Lift once its Python 3.12 upgrade (requirements312.txt) lands.
+  "pandas>=2.3,<3",
+  "scipy",
+  "en-core-web-sm",
+  "httpx",
+  # Imported by the vendored ask-genome-core code.
+  "jinja2",
+  "pyyaml",
+  "requests",
+]
+
+[tool.uv.sources]
+orchestration-core = { workspace = true }
+en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }

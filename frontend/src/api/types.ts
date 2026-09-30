@@ -1,0 +1,32 @@
+import type { components } from "./schema";
+
+type Schemas = components["schemas"];
+
+export type ExecutionStatus = Schemas["ExecutionStatus"];
+export type ObservabilityStatus = Schemas["ObservabilityStatus"];
+export type RequestOrigin = Schemas["RequestOrigin"];
+export type SessionSummary = Schemas["SessionSummary"];
+export type ConversationMessage = Schemas["ConversationMessage"];
+export type TurnSummary = Schemas["TurnSummary"];
+export type SanitizedError = Schemas["SanitizedExecutionError"];
+export type FailureDetail = Schemas["FailureDetail"];
+export type AttemptSummary = Schemas["AttemptSummary"];
+export type TraceDetail = Schemas["TraceDetail"];
+export type CapturePresence = Schemas["CapturePresence"];
+export type SpanSummary = Schemas["SpanSummary"];
+export type CapturedContent = Schemas["CapturedContent"];
+export type SpanDetail = Schemas["SpanDetail"];
+export type AgentDeployment = Schemas["AgentDeployment"];
+export type DeploymentDiagnostic = Schemas["DeploymentDiagnostic"];
+export type GraphDefinition = Schemas["GraphDefinition"];
+export type GraphNodeDefinition = Schemas["GraphNodeDefinition"];
+export type GraphEdgeDefinition = Schemas["GraphEdgeDefinition"];
+export type ChatResponse = Schemas["ChatResponse"];
+export type TracedChatError = Schemas["ChatErrorResponse"];
+export type PendingClarification = Schemas["PendingClarification"];
+export type SessionHistoryResponse = Schemas["SessionHistoryResponse"];
+export type ContinuationBody = Schemas["ContinuationBody"];
+export type ContinuationCompleted = Schemas["ContinuationCompleted"];
+export type SessionPage = Schemas["Page_SessionSummary_"];
+export type TurnPage = Schemas["Page_TurnSummary_"];
+export type AttemptPage = Schemas["Page_AttemptSummary_"];
