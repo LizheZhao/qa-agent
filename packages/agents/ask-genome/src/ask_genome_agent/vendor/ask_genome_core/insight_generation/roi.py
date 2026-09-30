@@ -1,5 +1,3 @@
-# Vendored from ask-genome-core bb1e1637bca4:src/insight_generation/roi.py
-# by scripts/sync_ask_genome_core.py. Do not edit by hand; change EDITS there.
 import os
 import sys
 import re
@@ -8,8 +6,8 @@ import numpy as np
 import pandas as pd
 from itertools import product
 
-import ask_genome_agent.vendor.ask_genome_core.insight_generation.utils as utils
-import ask_genome_agent.vendor.ask_genome_core.model.readout_utils as readout_utils
+import src.insight_generation.utils as utils
+import src.model.readout_utils as readout_utils
 
 
 def label_metric_level(df: pd.DataFrame, metric: str, time: str, q1=0.5, q2=0.75):

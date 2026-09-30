@@ -1,5 +1,3 @@
-# Vendored from ask-genome-core bb1e1637bca4:src/model/readout_utils.py
-# by scripts/sync_ask_genome_core.py. Do not edit by hand; change EDITS there.
 import re
 from typing import Optional, Dict, Iterator
 import numpy as np
@@ -9,14 +7,14 @@ import logging
 import os
 import random
 from calendar import month_name
-# from sklearn.linear_model import LinearRegression  (vendored: used only in dead code)
-# from sklearn.metrics import r2_score  (vendored: used only in dead code)
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
 from scipy.stats import spearmanr
-from ask_genome_agent.vendor.ask_genome_core.data.data_interface import ReadoutData
-from ask_genome_agent.vendor.ask_genome_core.data.local import get_data_path
-from ask_genome_agent.vendor.ask_genome_core.integrations.llm import generate_text
-from ask_genome_agent.vendor.ask_genome_core.model.common import PromptTemplates
-from ask_genome_agent.vendor.ask_genome_core.model.common import tokenize_text
+from src.data.data_interface import ReadoutData
+from src.data.local import get_data_path
+from src.integrations.llm import generate_text
+from src.model.common import PromptTemplates
+from src.model.common import tokenize_text
 from datetime import datetime
 from scipy.stats import mannwhitneyu
 from collections import defaultdict
@@ -286,7 +284,7 @@ def load_metric_formatting(client_code, model_group_id) -> list[dict]:
 
 
 def load_standardized_metrics() -> pd.DataFrame:
-    file_path = os.path.join(os.getenv("ASK_GENOME_DATA_DIR"), 'standardized_metrics.csv')
+    file_path = os.path.join(os.getenv("DATA_DIR"), 'standardized_metrics.csv')
     if os.path.exists(file_path):
         return pd.read_csv(file_path, low_memory=False)
     logger.info(f"Couldn't find standardized metrics at {file_path}")
@@ -364,7 +362,7 @@ def load_insight_instructions(client_code: str, model_group_id: int, intention: 
     if os.path.exists(file_path):
         df = pd.read_csv(file_path, low_memory=False)
     else:
-        df = pd.read_csv(os.path.join(os.getenv("ASK_GENOME_DATA_DIR"), 'insight_instruction.csv'), low_memory=False)
+        df = pd.read_csv(os.path.join(os.getenv("DATA_DIR"), 'insight_instruction.csv'), low_memory=False)
         logger.info(f"Using global insight instructions for {client_code} {model_group_id}")
     try:
         res = df[df["intentionName"] == intention]
@@ -4061,36 +4059,58 @@ def _soc_split_table(table):
 #     return agg_str, detail_str, agg_head, detail_head
 
 
-def table_to_text(agg_table, detail_table, take_head=True, buffer=800):
+def table_to_text(agg_table, detail_table, take_head=True, buffer=500):
+    max_tokens = int(os.getenv("LLM_MAX_INPUT_TOKENS")) - buffer
 
-    def process_table(table, take_head=take_head):
+    def serialize(table):
         if table.empty:
-            return "No data available. ", table
-        if take_head:
-            head = table.head(20)
-        else:
-            head = table.copy()
-        table_str = _output_table_to_text(head)
-        return table_str, head
+            return "No data available. "
+        if any('Source Of Change' in col for col in table.columns):
+            positive, negative = _soc_split_table(table)
+            positive_text = _output_table_to_text(positive) if not positive.empty else "No data available. "
+            negative_text = _output_table_to_text(negative) if not negative.empty else "No data available. "
+            return ('Positive SOC drivers:\n' + positive_text
+                    + '\nNegative SOC drivers:\n' + negative_text)
+        return _output_table_to_text(table)
 
-    if any('Source Of Change' in col for col in agg_table.columns):
-        pos_agg_df, neg_agg_df = _soc_split_table(agg_table)
-        pos_agg_str, _ = process_table(pos_agg_df, take_head)
-        neg_agg_str, _ = process_table(neg_agg_df, take_head)
-        agg_str = 'Positive SOC drivers:\n' + pos_agg_str + '\nNegative SOC drivers:\n' + neg_agg_str
-        _, agg_head = process_table(agg_table, take_head)
-    else:
-        agg_str, agg_head = process_table(agg_table, take_head)
+    agg_head = agg_table.head(20).copy() if take_head else agg_table.copy()
+    detail_head = detail_table.head(20).copy() if take_head else detail_table.copy()
+    agg_str, detail_str = serialize(agg_head), serialize(detail_head)
+    agg_tokens, detail_tokens = len(tokenize_text(agg_str)), len(tokenize_text(detail_str))
+    total_tokens = agg_tokens + detail_tokens
+    if total_tokens <= max_tokens:
+        return agg_str, detail_str, agg_head, detail_head
 
-    if any('Source Of Change' in col for col in detail_table.columns):
-        pos_detail_df, neg_detail_df = _soc_split_table(detail_table)
-        pos_detail_str, _ = process_table(pos_detail_df, take_head)
-        neg_detail_str, _ = process_table(neg_detail_df, take_head)
-        detail_str = 'Positive SOC drivers:\n' + pos_detail_str + '\nNegative SOC drivers:\n' + neg_detail_str
-        _, detail_head = process_table(detail_table, take_head)
-    else:
-        detail_str, detail_head = process_table(detail_table, take_head)
+    def fit_table(table, budget):
+        if table.empty:
+            return "", table
 
+        dimension_cols, _, _ = _categorize_columns(table)
+        groups = (table.groupby(dimension_cols, sort=False, dropna=False, observed=True)
+                  if dimension_cols else None)
+        max_n = int(groups.size().max()) if groups is not None else len(table)
+
+        def first_n(n):
+            return groups.head(n) if groups is not None else table.head(n)
+
+        low, high = 1, max_n
+        res_table = first_n(1)
+        res_text = serialize(res_table)
+        while low <= high:
+            n = (low + high) // 2
+            candidate = first_n(n)
+            candidate_text = serialize(candidate)
+            if len(tokenize_text(candidate_text)) <= budget:
+                res_table, res_text = candidate, candidate_text
+                low = n + 1
+            else:
+                high = n - 1
+        return res_text, res_table
+
+    agg_budget = max_tokens * agg_tokens // total_tokens
+    detail_budget = max_tokens - agg_budget
+    agg_str, agg_head = fit_table(agg_head, agg_budget)
+    detail_str, detail_head = fit_table(detail_head, detail_budget)
     return agg_str, detail_str, agg_head, detail_head
 
 

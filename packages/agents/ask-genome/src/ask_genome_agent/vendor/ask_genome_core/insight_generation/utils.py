@@ -1,5 +1,3 @@
-# Vendored from ask-genome-core bb1e1637bca4:src/insight_generation/utils.py
-# by scripts/sync_ask_genome_core.py. Do not edit by hand; change EDITS there.
 import os
 import sys
 import re
@@ -7,21 +5,25 @@ import calendar
 import numpy as np
 import pandas as pd
 from scipy.stats import spearmanr
-import ask_genome_agent.vendor.ask_genome_core.model.readout_utils as readout_utils
-import ask_genome_agent.vendor.ask_genome_core.insight_generation.contribution as contribution_utils
-import ask_genome_agent.vendor.ask_genome_core.insight_generation.roi as roi_utils
-import ask_genome_agent.vendor.ask_genome_core.insight_generation.spend as spend_utils
-import ask_genome_agent.vendor.ask_genome_core.insight_generation.standard_metric as standard_metric_utils
-import ask_genome_agent.vendor.ask_genome_core.model.visual_config_utils as visual_configs
+import src.model.readout_utils as readout_utils
+import src.insight_generation.contribution as contribution_utils
+import src.insight_generation.roi as roi_utils
+import src.insight_generation.spend as spend_utils
+import src.insight_generation.standard_metric as standard_metric_utils
+import src.model.visual_config_utils as visual_configs
 
 
 MONTH_NUMBERS = {
     name.casefold(): i for i, name in enumerate(calendar.month_name) if name
 }
 MONTH_PATTERN = "|".join(calendar.month_name[1:])
+SINGLE_TIME_PATTERN = (
+    rf"(?:(?:Q|Quarter\s+)[1-4]|(?:H|Half\s+)[1-2]|M(?:1[0-2]|[1-9])|Month\s+(?:1[0-2]|[1-9])|"
+    rf"{MONTH_PATTERN})\s+\d{{4}}|\b\d{{4}}\b"
+)
+TIME_RANGE_SEPARATOR = r"\s+-\s+"
 TIME_PATTERN = re.compile(
-    rf"(?:Q[1-4]|H[1-2]|M(?:1[0-2]|[1-9])|Month\s+(?:1[0-2]|[1-9])|"
-    rf"{MONTH_PATTERN})\s+\d{{4}}|\b\d{{4}}\b",
+    rf"(?:{SINGLE_TIME_PATTERN})(?:{TIME_RANGE_SEPARATOR}(?:{SINGLE_TIME_PATTERN}))?",
     re.IGNORECASE,
 )
 
@@ -61,15 +63,21 @@ def normalize_time(df: pd.DataFrame):
     :param df:
     :return:
     """
-    # normalize time
-    df["time_norm"] = df["time"].str.replace(
-        r'.*?(year|quarter|half|month)\s*(\d{0,2})\D*(\d{4}).*',
-        lambda m: {
-            'year': m.group(3),
-            'quarter': f"Q{m.group(2)} {m.group(3)}",
-            'half': f"H{m.group(2)} {m.group(3)}",
-            'month': f"M{int(m.group(2) or 0)} {m.group(3)}"
-        }[m.group(1)], regex=True)
+    # normalize time, each side of a range separately
+    def _normalize(value):
+        return re.sub(
+            r'.*?(year|quarter|half|month)\s*(\d{0,2})\D*(\d{4}).*',
+            lambda m: {
+                'year': m.group(3),
+                'quarter': f"Q{m.group(2)} {m.group(3)}",
+                'half': f"H{m.group(2)} {m.group(3)}",
+                'month': f"M{int(m.group(2) or 0)} {m.group(3)}"
+            }[m.group(1)], value)
+
+    df["time_norm"] = df["time"].map(
+        lambda value: " - ".join(_normalize(part) for part in re.split(TIME_RANGE_SEPARATOR, value))
+        if isinstance(value, str) else value
+    )
     return df
 
 
@@ -79,8 +87,18 @@ def extract_time(value) -> str | None:
     return match.group(0) if match else None
 
 
-def time_sort_key(value) -> tuple[int, int]:
-    """Return a chronological sort key for one supported time label."""
+def time_sort_key(value) -> tuple[int, ...]:
+    """Return a chronological sort key for one supported time label.
+
+    A range sorts by its end period, then by its start period.
+    """
+    parts = re.split(TIME_RANGE_SEPARATOR, str(value).strip())
+    if len(parts) == 2:
+        return _period_sort_key(parts[1]) + _period_sort_key(parts[0])
+    return _period_sort_key(parts[0])
+
+
+def _period_sort_key(value) -> tuple[int, int]:
     value = str(value).strip()
     match = re.search(r"(\d{4})", value)
     if match is None:
@@ -88,9 +106,9 @@ def time_sort_key(value) -> tuple[int, int]:
     year = int(match.group(1))
     period = value[:match.start()].strip().casefold()
     if period.startswith("q"):
-        return year, (int(period[1:]) - 1) * 3 + 1
+        return year, (int(re.search(r"\d", period).group(0)) - 1) * 3 + 1
     if period.startswith("h"):
-        return year, (int(period[1:]) - 1) * 6 + 1
+        return year, (int(re.search(r"\d", period).group(0)) - 1) * 6 + 1
     if period.startswith("month"):
         return year, int(period.split()[-1])
     if re.fullmatch(r"m(?:1[0-2]|[1-9])", period):
@@ -110,6 +128,9 @@ def sorted_times_from_columns(columns) -> list[str]:
 
 def display_time(value) -> str:
     """Convert internal month labels to their full display name."""
+    parts = re.split(TIME_RANGE_SEPARATOR, str(value).strip())
+    if len(parts) == 2:
+        return " - ".join(display_time(part) for part in parts)
     match = re.fullmatch(
         r"(?:M(1[0-2]|[1-9])|Month\s+(1[0-2]|[1-9]))\s+(\d{4})",
         str(value).strip(),

@@ -1,5 +1,3 @@
-# Vendored from ask-genome-core bb1e1637bca4:src/model/readout.py
-# by scripts/sync_ask_genome_core.py. Do not edit by hand; change EDITS there.
 import json
 import logging
 import os
@@ -11,14 +9,14 @@ import numpy as np
 import pandas as pd
 import importlib
 
-from ask_genome_agent.vendor.ask_genome_core.data.data_interface import ReadoutData, ProcessIndicator
-from ask_genome_agent.vendor.ask_genome_core.data.local import get_data_path
-from ask_genome_agent.vendor.ask_genome_core.integrations.llm import generate_text, stream_text
-from ask_genome_agent.vendor.ask_genome_core.integrations.llm_external import generate_analysis_response, generate_denial_response
-from ask_genome_agent.vendor.ask_genome_core.model.common import PromptTemplates, truncate_by_tokens
-import ask_genome_agent.vendor.ask_genome_core.model.readout_utils as readout_utils
-from ask_genome_agent.vendor.ask_genome_core.model.readout_utils import _get_driver_tag_default
-from ask_genome_agent.vendor.ask_genome_core.utils import load_yaml_file
+from src.data.data_interface import ReadoutData, ProcessIndicator
+from src.data.local import get_data_path
+from src.integrations.llm import generate_text, stream_text
+from src.integrations.llm_external import generate_analysis_response, generate_denial_response
+from src.model.common import PromptTemplates, truncate_by_tokens
+import src.model.readout_utils as readout_utils
+from src.model.readout_utils import _get_driver_tag_default
+from src.utils import load_yaml_file
 
 logger = logging.getLogger(__name__)
 
@@ -1881,10 +1879,7 @@ class Postprocess:
         return self.readout, self.detail_view, self.benchmark_data, self.benchmark_str, self.planner_data, self.spend_share_principle, self.pretext, self.agg_view, self.pretext_table, self.pretext_table_trend, self.result_combo_match, '', pd.DataFrame(), readout_adj
 
 
-def set_environment_variables(
-        path=str(pathlib.Path(__file__).resolve().parents[1]
-                 / 'config' / 'function_mapping.yaml'),
-) -> None:
+def set_environment_variables(path='config/function_mapping.yaml') -> None:
     logger.info('Setting up function mapping env variables')
     config = load_yaml_file(path)
     for key, value in config.items():

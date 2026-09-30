@@ -1,5 +1,3 @@
-# Vendored from ask-genome-core bb1e1637bca4:src/model/common.py
-# by scripts/sync_ask_genome_core.py. Do not edit by hand; change EDITS there.
 import os
 from dataclasses import dataclass, field
 from jinja2 import Template
@@ -7,7 +5,7 @@ import logging
 from typing import List, Dict, Any
 import requests
 
-from ask_genome_agent.vendor.ask_genome_core.utils import load_yaml_file
+from src.utils import load_yaml_file
 
 
 logger = logging.getLogger(__name__)
@@ -73,7 +71,7 @@ class PromptTemplates:
     change_time_message: str = field(init=False)
 
     def __post_init__(self):
-        prompt_config = load_yaml_file(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", "prompt.yaml"))
+        prompt_config = load_yaml_file("./config/prompt.yaml")
 
         self.readout_template = Template(prompt_config["READOUT_PROMPT"])
         self.external_readout_template = Template(prompt_config["EXTERNAL_READOUT_PROMPT"])
@@ -92,7 +90,7 @@ class PromptTemplates:
         self.change_intention_message = prompt_config["REJECTION_RESPONSE_CHANGE_INTENTION"]
         self.change_time_message = prompt_config["REJECTION_RESPONSE_CHANGE_TIME"]
 
-        client_uid = f'{os.getenv("ASK_GENOME_CLIENT_CODE")}-{os.getenv("ASK_GENOME_MODEL_GROUP_ID")}'
+        client_uid = f'{os.getenv("CLIENT_CODE")}-{os.getenv("MODEL_GROUP_ID")}'
 
         client_specific_prompt = prompt_config["CLIENT_SPECIFIC_PROMPT"]
 
@@ -218,7 +216,7 @@ class PromptTemplates:
                 template = Template(head + self._DENIAL_START_MARKER + "\n" + custom_instructions
                                     + "\n\n" + self._DENIAL_END_MARKER + tail)
         return template.render(
-            client_code=os.getenv("ASK_GENOME_CLIENT_CODE", ""),
+            client_code=os.getenv("CLIENT_CODE", ""),
             query=query,
             readout=readout,
             response=response,

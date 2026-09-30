@@ -1,5 +1,3 @@
-# Vendored from ask-genome-core bb1e1637bca4:src/model/coverage.py
-# by scripts/sync_ask_genome_core.py. Do not edit by hand; change EDITS there.
 """Coverage branch (v1).
 
 Answers data-coverage / metadata questions ("how many quarters did we run paid social",
@@ -14,8 +12,8 @@ import logging
 
 import pandas as pd
 
-from ask_genome_agent.vendor.ask_genome_core.utils import load_yaml_file
-from ask_genome_agent.vendor.ask_genome_core.integrations.sdk_utils import coverage_spec_call, text_llm_call
+from src.utils import load_yaml_file
+from src.integrations.sdk_utils import coverage_spec_call, text_llm_call
 
 
 logger = logging.getLogger(__name__)
@@ -97,7 +95,7 @@ def answer_coverage(query: str, hints: dict, core_filters: dict, feasibility,
                     df_bi: pd.DataFrame, df_br: pd.DataFrame) -> dict:
     """Answer a coverage sub-query. Returns {response, table, spec, facts}."""
     # local import to keep this module light-importable (planner pulls the heavy NER chain)
-    from ask_genome_agent.vendor.ask_genome_core.model.planner import resolve_referenced_terms
+    from src.model.planner import resolve_referenced_terms
 
     prompts = load_yaml_file("./config/prompt.yaml")
     spec_prompt = (prompts["COVERAGE_SPEC_PROMPT"]
