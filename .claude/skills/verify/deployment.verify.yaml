@@ -1,0 +1,31 @@
+deployment:
+  name: local-verification
+  revision: "0.10.0"
+
+application:
+  package: agentic-orchestration
+  version: "0.9.0"
+
+platform:
+  package: orchestration-core
+  version: "0.7.0"
+
+integrations:
+  enterprise_llm:
+    package: enterprise-llm
+    version: "0.1.0"
+
+agents:
+  router:
+    package: router-agent
+    version: "0.5.0"
+    entrypoint: router_agent.graph:create_graph
+    manifest_entrypoint: router_agent:AGENT_MANIFEST
+    routable: false
+  marketing_science:
+    package: marketing-science-agent
+    version: "0.3.0"
+    entrypoint: marketing_science_agent.graph:create_graph
+    manifest_entrypoint: marketing_science_agent:AGENT_MANIFEST
+    routable: true
+entry_agent: router

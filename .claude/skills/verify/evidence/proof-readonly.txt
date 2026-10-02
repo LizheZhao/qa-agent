@@ -1,0 +1,19 @@
+﻿## GET /health
+{"status":"ok"}
+HTTP 200
+
+## GET /build
+{"repository":"agentic-orchestration","application_version":"0.9.0","source_commit":"","deployment":{"name":"local-verification","revision":"0.10.0"},"architectural_packages":{"agentic-orchestration":"0.9.0","orchestration-core":"0.7.0","enterprise-llm":"0.1.0","router-agent":"0.5.0","marketing-science-agent":"0.3.0"},"uv_lock_sha256":null,"immutable":false}
+HTTP 200
+
+## GET /api/diagnostics/deployment
+{"name":"local-verification","revision":"0.10.0","entry_agent":"router","agents":[{"agent_id":"marketing_science","version":"0.3.0","routable":true,"graph_definition_id":"marketing_science:0.3.0:dcb389030feae101"},{"agent_id":"router","version":"0.5.0","routable":false,"graph_definition_id":"router:0.5.0:42362979b80f30ff"}]}
+HTTP 200
+
+## GET /api/diagnostics/sessions?limit=2
+{"items":[{"session_id":"d4421c74-a9d3-4083-9d6b-b201f7a15deb","agent_id":"router","display_title":"Why did UKI Consumer efficiency improve in Q2 FY25, and which tactics were strongest?","revision":1,"status":"active","created_at":"2026-10-02T18:18:39.952000Z","updated_at":"2026-10-02T18:18:39.952000Z"},{"session_id":"5c6ec2bc-319b-4e66-a1ce-866c04ea22fb","agent_id":"router","display_title":"How much did LMS spend in Q2 FY26 in the US and UKI?","revision":1,"status":"active","created_at":"2026-10-01T20:29:16.580000Z","updated_at":"2026-10-01T20:29:16.580000Z"}],"next_cursor":"eyJraW5kIjoic2Vzc2lvbnMiLCJ2IjoxLCJ2YWx1ZXMiOlsiMjAyNi0xMC0wMVQyMDoyOToxNi41ODAwMDArMDA6MDAiLCI1YzZlYzJiYy0zMTliLTRlNjYtYTFjZS04NjZjMDRlYTIyZmIiXX0"}
+HTTP 200
+
+## GET /api/diagnostics/traces?limit=2
+{"items":[{"trace_id":"a19756d1-525b-4729-a15c-9386c8600096","session_id":"d4421c74-a9d3-4083-9d6b-b201f7a15deb","request_origin":"diagnostic_ui","attempted_turn_number":1,"committed_turn_number":1,"status":"completed","observability_status":"complete","started_at":"2026-10-02T18:17:01.516000Z","completed_at":"2026-10-02T18:18:39.958000Z","error":null,"input_preview":"Why did UKI Consumer efficiency improve in Q2 FY25, and which tactics were strongest?"},{"trace_id":"68bbe239-5b5e-4ffa-8ef8-849bde376455","session_id":"5c6ec2bc-319b-4e66-a1ce-866c04ea22fb","request_origin":"api","attempted_turn_number":1,"committed_turn_number":1,"status":"completed","observability_status":"complete","started_at":"2026-10-01T20:28:58.856000Z","completed_at":"2026-10-01T20:29:16.588000Z","error":null,"input_preview":null}],"next_cursor":"eyJraW5kIjoicmVjZW50X2F0dGVtcHRzIiwidiI6MSwidmFsdWVzIjpbIjIwMjYtMTAtM
+{"schema_version":4,"definition_id":"marketing_science:0.3.0:dcb389030feae101","definition_hash":"dcb389030feae1018932f73bdb73dc681b79e8de58325ff35a027aa153dc902d","agent_id":"marketing_science","agent_version":"0.3.0","entrypoint":"marketing_science_agent.graph:create_graph","nodes":[{"node_id":"__end__","display_name":"__end__","kind":"end","owner_path":[],"prompt_template":null,"destination_agent_id":null,"attributes":{}},{"node_id":"__start__","display_name":"__start__","kind":"start","ownerGET /diagnostics HTTP 503 (UI not built; npm registry blocked)

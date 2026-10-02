@@ -31,6 +31,7 @@ import logging
 from typing import Any
 
 from ask_genome_agent.config import load_narrowing_config, load_ner_data, load_time_indicators
+from ask_genome_agent.nodes.question_understanding.support.describe import describe_dataframe
 from ask_genome_agent.nodes.question_understanding.support.filtering import (
     answer_dict_for,
     rejection_message_for,
@@ -132,6 +133,10 @@ async def apply_data_filters(state: AskGenomeState) -> dict[str, Any]:
     # dataframes ask-genome-core returns are levels.split_by_level away. See support/levels.py.
     entry["data_levels"] = narrowed.data_levels
     entry["rejection_message"] = rejection
+    # Read off the whole result here, where it is in memory, for the response prompt.
+    entry["dataframe_description"] = describe_dataframe(
+        filtered, narrowing.level_type, list(narrowed.data_levels)
+    )
     # A sample, not the result: a LINKEDIN spend question matches ~96k rows, and inlining those
     # blew the checkpoint document's 16MB limit and failed the request. Nothing reads them yet.
     # When response generation needs the real rows they belong in the artifact store, with only a
